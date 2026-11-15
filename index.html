@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zmeya — Сборник Игр 🐍</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Анимированный фон -->
+<canvas id="bg-canvas"></canvas>
+
+<div class="app">
+  <!-- ===== ГЛАВНОЕ МЕНЮ ===== -->
+  <div id="menu" class="screen active">
+    <header class="hero">
+      <div class="logo-snake">🐍</div>
+      <h1 class="glitch" data-text="ZMEYA">ZMEYA</h1>
+      <p class="tagline">// аркадный сборник игр //</p>
+      <div class="highscore-banner">
+        <span class="hs-label">🏆 Рекорд</span>
+        <span class="hs-value" id="total-highscore">0</span>
+      </div>
+    </header>
+
+    <div class="game-grid">
+      <button class="game-card" data-game="snake">
+        <div class="card-icon">🐍</div>
+        <div class="card-title">Змейка</div>
+        <div class="card-desc">Классика жанра. Ешь, расти, не кусай себя!</div>
+        <div class="card-record" id="rec-snake">рекорд: —</div>
+      </button>
+
+      <button class="game-card" data-game="memory">
+        <div class="card-icon">🧠</div>
+        <div class="card-title">Память</div>
+        <div class="card-desc">Найди все пары эмодзи за минимум ходов.</div>
+        <div class="card-record" id="rec-memory">рекорд: —</div>
+      </button>
+
+      <button class="game-card" data-game="reaction">
+        <div class="card-icon">⚡</div>
+        <div class="card-title">Реакция</div>
+        <div class="card-desc">Жми, как только экран станет зелёным!</div>
+        <div class="card-record" id="rec-reaction">рекорд: —</div>
+      </button>
+
+      <button class="game-card" data-game="breakout">
+        <div class="card-icon">🧱</div>
+        <div class="card-title">Арканоид</div>
+        <div class="card-desc">Разбей все кирпичи платформой и мячом.</div>
+        <div class="card-record" id="rec-breakout">рекорд: —</div>
+      </button>
+
+      <button class="game-card" data-game="clicker">
+        <div class="card-icon">🎯</div>
+        <div class="card-title">Кликер</div>
+        <div class="card-desc">Лови цели за 30 секунд. Чистый аим!</div>
+        <div class="card-record" id="rec-clicker">рекорд: —</div>
+      </button>
+
+      <button class="game-card" data-game="rps">
+        <div class="card-icon">✂️</div>
+        <div class="card-title">Камень·Ножницы</div>
+        <div class="card-desc">Дуэль с нейросетью уровня «бог» (просто рандом).</div>
+        <div class="card-record" id="rec-rps">рекорд: —</div>
+      </button>
+    </div>
+
+    <footer class="footer">
+      <span>Zmeya Arcade © 2026 · сделано с 💚 и 🐍</span>
+      <button id="reset-scores" class="btn btn-ghost btn-sm">сбросить рекорды</button>
+    </footer>
+  </div>
+
+  <!-- ===== ЗМЕЙКА ===== -->
+  <div id="game-snake" class="screen game-screen">
+    <div class="game-header">
+      <button class="btn btn-back" data-back>← Меню</button>
+      <h2>🐍 Змейка</h2>
+      <div class="game-stats"><span>Счёт: <b id="snake-score">0</b></span><span>Рекорд: <b id="snake-best">0</b></span></div>
+    </div>
+    <div class="game-body center">
+      <canvas id="snake-canvas" width="480" height="480" class="pixel-frame"></canvas>
+      <div id="snake-overlay" class="overlay">
+        <div class="overlay-content">
+          <div class="overlay-emoji">🐍</div>
+          <p>Стрелки / WASD / свайпы<br><small>Пробел — пауза</small></p>
+          <button class="btn btn-primary" id="snake-start">Играть</button>
+        </div>
+      </div>
+    </div>
+    <div class="dpad" id="snake-dpad">
+      <button data-dir="up">▲</button>
+      <div><button data-dir="left">◀</button><button data-dir="down">▼</button><button data-dir="right">▶</button></div>
+    </div>
+  </div>
+
+  <!-- ===== ПАМЯТЬ ===== -->
+  <div id="game-memory" class="screen game-screen">
+    <div class="game-header">
+      <button class="btn btn-back" data-back>← Меню</button>
+      <h2>🧠 Память</h2>
+      <div class="game-stats"><span>Ходы: <b id="memory-moves">0</b></span><span>Пары: <b id="memory-pairs">0/8</b></span></div>
+    </div>
+    <div class="game-body center">
+      <div id="memory-board" class="memory-board"></div>
+      <div id="memory-overlay" class="overlay hidden">
+        <div class="overlay-content">
+          <div class="overlay-emoji">🎉</div>
+          <p id="memory-result"></p>
+          <button class="btn btn-primary" id="memory-restart">Ещё раз</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== РЕАКЦИЯ ===== -->
+  <div id="game-reaction" class="screen game-screen">
+    <div class="game-header">
+      <button class="btn btn-back" data-back>← Меню</button>
+      <h2>⚡ Реакция</h2>
+      <div class="game-stats"><span>Лучшая: <b id="reaction-best">—</b></span></div>
+    </div>
+    <div class="game-body center">
+      <div id="reaction-zone" class="reaction-zone waiting">
+        <div id="reaction-text">Нажми, чтобы начать</div>
+        <div id="reaction-time" class="reaction-time"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== АРКАНОИД ===== -->
+  <div id="game-breakout" class="screen game-screen">
+    <div class="game-header">
+      <button class="btn btn-back" data-back>← Меню</button>
+      <h2>🧱 Арканоид</h2>
+      <div class="game-stats"><span>Счёт: <b id="breakout-score">0</b></span><span>Жизни: <b id="breakout-lives">3</b></span></div>
+    </div>
+    <div class="game-body center">
+      <canvas id="breakout-canvas" width="560" height="480" class="pixel-frame"></canvas>
+      <div id="breakout-overlay" class="overlay">
+        <div class="overlay-content">
+          <div class="overlay-emoji">🧱</div>
+          <p>Мышь / стрелки — двигать платформу</p>
+          <button class="btn btn-primary" id="breakout-start">Играть</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== КЛИКЕР ===== -->
+  <div id="game-clicker" class="screen game-screen">
+    <div class="game-header">
+      <button class="btn btn-back" data-back>← Меню</button>
+      <h2>🎯 Кликер</h2>
+      <div class="game-stats"><span>Счёт: <b id="clicker-score">0</b></span><span>Время: <b id="clicker-time">30</b></span></div>
+    </div>
+    <div class="game-body center">
+      <div id="clicker-arena" class="clicker-arena"></div>
+      <div id="clicker-overlay" class="overlay">
+        <div class="overlay-content">
+          <div class="overlay-emoji">🎯</div>
+          <p>Кликай по змеям! Красная 🐍 = −3 очка 😈</p>
+          <button class="btn btn-primary" id="clicker-start">Старт</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== КАМЕНЬ-НОЖНИЦЫ ===== -->
+  <div id="game-rps" class="screen game-screen">
+    <div class="game-header">
+      <button class="btn btn-back" data-back>← Меню</button>
+      <h2>✂️ Камень·Ножницы·Бумага</h2>
+      <div class="game-stats"><span>Ты: <b id="rps-player">0</b></span><span>Комп: <b id="rps-cpu">0</b></span></div>
+    </div>
+    <div class="game-body center rps-body">
+      <div class="rps-arena">
+        <div class="rps-fighter" id="rps-you">🫴</div>
+        <div class="rps-vs">VS</div>
+        <div class="rps-fighter" id="rps-cpu">🤜</div>
+      </div>
+      <div id="rps-message" class="rps-message">Выбери своё оружие:</div>
+      <div class="rps-buttons">
+        <button class="btn rps-btn" data-choice="rock">🪨 Камень</button>
+        <button class="btn rps-btn" data-choice="scissors">✂️ Ножницы</button>
+        <button class="btn rps-btn" data-choice="paper">📄 Бумага</button>
+      </div>
+      <div id="rps-series" class="rps-series"></div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
